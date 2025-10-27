@@ -1,22 +1,23 @@
-﻿#include <iostream> 
+﻿#include <iostream>
 #include "MyLib.h"
 using namespace std;
 
 int main() {
     cout << "Traveling Salesman Problem \n";
-    int** matrix = nullptr;  
-    int Cities = 0, k = 0;
 
+    int** matrix = nullptr;
+    int Cities = 0;
+
+    // 1. Ввод количества городов
     cout << "How many cities: ";
     cin >> Cities;
 
-    // Проверка корректности ввода
     if (Cities <= 0) {
         cout << "Error: Number of cities must be positive!" << endl;
         return 1;
     }
 
-    // Выделение памяти для матрицы
+    // Создаем матрицу
     matrix = new int* [Cities];
     for (int i = 0; i < Cities; i++) {
         matrix[i] = new int[Cities]();
@@ -25,61 +26,84 @@ int main() {
     Randmatr(matrix, Cities, Cities);
     Outputmatr(matrix, Cities, Cities);
 
-    cout << endl << "Enter city number: ";
-    cin >> k;
+    // 2. Ввод количества стартовых городов
+    int num_k = 0;
+    cout << "How many starting cities (k): ";
+    cin >> num_k;
 
-    // Проверка корректности номера города
-    while (k <= 0 || k > Cities) {
-        cout << "\nWe have only " << Cities << " cities (1 to " << Cities << ")\nEnter city number: ";
-        cin >> k;
+    if (num_k <= 0 || num_k > Cities) {
+        cout << "Error: Number of k must be between 1 and " << Cities << endl;
+        return 1;
     }
 
-    int total = 1;  // Подсчет количества перестановок
-    for (int i = 1; i < Cities; i++)
-        total *= i;
-    cout << endl << "Number of permutations: " << total << endl;
+    // 3. Ввод конкретных номеров k
+    int* k_values = new int[num_k];
+    cout << "Enter " << num_k << " starting city numbers (1 to " << Cities << "):" << endl;
 
-    int* perest = new int[Cities + 1]();
-    int* PerestMin = new int[Cities + 1](); 
+    for (int i = 0; i < num_k; i++) {
+        cout << "k" << (i + 1) << ": ";
+        cin >> k_values[i];
 
-    Peres(perest, Cities, k);
-    OutputPeres(perest, Cities);
-
-    /*cout << "Permutation: ";
-    for (int i = 0; i <= Cities; i++) {
-        cout << perest[i] << " ";
-    }
-    cout << endl;*/
-
-    int minSumPermut = PermutationSum(matrix, perest, Cities);  // Минимальная сумма маршрута
-
-    cout << " - Route length number 1: " << minSumPermut << endl;
-    PerestMin[Cities] = k;
-    for (int i = 0; i < Cities; i++)
-        PerestMin[i] = perest[i];  // Сохраняем первую перестановку как минимальная
-
-    int a = 2;
-    while (Permutation(perest, Cities) != 0) {
-        int flag = PermutationSum(matrix, perest, Cities);
-        if (flag < minSumPermut) {
-            minSumPermut = flag;  // Сохраняем минимальную сумму перестановки
-            PerestMin[Cities] = k;  // Последний элемент - начальный город
-            for (int i = 0; i < Cities; i++)  // Сохраняем мин перестановку
-                PerestMin[i] = perest[i];
+        // Проверка корректности
+        while (k_values[i] <= 0 || k_values[i] > Cities) {
+            cout << "Invalid city! Enter 1 to " << Cities << ": ";
+            cin >> k_values[i];
         }
-        cout << " - Route length number " << a++ << ": " << flag << endl;
     }
 
-    cout << endl;
-    OutputPeres(PerestMin, Cities);
-    cout << endl << "Length of the minimum rout: " << minSumPermut;
+    // 4. Вычисление для каждого k
+    for (int idx = 0; idx < num_k; idx++) {
+        int k = k_values[idx];
+
+        cout << "\nCALCULATING FOR STARTING CITY " << k  << endl;
+
+        int total = 1;
+        for (int i = 1; i < Cities; i++)
+            total *= i;
+        cout << "Number of permutations: " << total << endl;
+
+        int* perest = new int[Cities + 1]();
+        int* PerestMin = new int[Cities + 1]();
+
+        Peres(perest, Cities, k);
+
+        int minSumPermut = PermutationSum(matrix, perest, Cities);
+        cout << " - ";
+        OutputPeres(perest, Cities);
+        cout << " - Route length number 1: " << minSumPermut << endl;
+
+        PerestMin[Cities] = k;
+        for (int i = 0; i < Cities; i++)
+            PerestMin[i] = perest[i];
+
+        int a = 2;
+        while (Permutation(perest, Cities) != 0) {
+            int flag = PermutationSum(matrix, perest, Cities);
+            if (flag < minSumPermut) {
+                minSumPermut = flag;
+                PerestMin[Cities] = k;
+                for (int i = 0; i < Cities; i++)
+                    PerestMin[i] = perest[i];
+            }
+            cout << " - ";
+            OutputPeres(perest, Cities);
+            cout << " - Route length number " << a++ << ": " << flag << endl;
+        }
+
+        cout << "OPTIMAL ROUTE for city " << k << ": ";
+        OutputPeres(PerestMin, Cities);
+        cout << endl << "Minimum length: " << minSumPermut << endl;
+
+        delete[] perest;
+        delete[] PerestMin;
+    }
 
     // Освобождение памяти
-    delete[] perest;
-    delete[] PerestMin;
+    delete[] k_values;
     for (int i = 0; i < Cities; i++)
         delete[] matrix[i];
     delete[] matrix;
 
+    cout << "\nAll calculations completed!" << endl;
     return 0;
 }

@@ -4,7 +4,7 @@
 #include <ctime>
 using namespace std;
 
-// 1. Обмен двух элементов
+// 1. Обмен двух элементов,,,
 void Swap(int* a, int* b) {
     int tmp = *a;
     *a = *b;
@@ -87,17 +87,17 @@ bool Permutation(int* P, int cities) {
 // 8. Вычисление длины маршрута
 int PermutationSum(int** Matr, int* P, int cities) {
     int total = 0;
-    for (int i = 0; i < cities; i++) {
-        int from = P[i] - 1;  
+    for (int i = 0; i < cities - 1; i++) {
+        int from = P[i] - 1;
         int to = P[i + 1] - 1;
 
         // Проверка выхода за границы (на всякий случай)
-       /* if (from < 0 || from >= cities || to < 0 || to >= cities) {
+        if (from < 0 || from >= cities || to < 0 || to >= cities) {
             cout << "ERROR: Invalid city index!" << endl;
             return -1;
-        }*/
+        }
 
         total += Matr[from][to];
     }
-    return total;
+        return total;
 }
